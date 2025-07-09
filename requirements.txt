@@ -1,0 +1,6 @@
+aiohttp
+typing-extensions;python_version<"3.11"
+py-cord
+pydantic
+quart-cors
+quart
