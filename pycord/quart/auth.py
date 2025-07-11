@@ -231,7 +231,7 @@ class DiscordAuth:
             permissions = int(guild_data.get('permissions', 0))
             if permissions & 8:
                 guild_info = {
-                    "id": int(guild_data['id']),
+                    "id": guild_data['id'],
                     "name": guild_data['name'],
                     "icon": f"https://cdn.discordapp.com/icons/{guild_data['id']}/{guild_data['icon']}.png" if guild_data.get('icon') else None,
                     "owner": guild_data.get('owner', False),
