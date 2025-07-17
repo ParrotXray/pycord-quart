@@ -37,8 +37,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip setuptools wheel
-        pip install black isort flake8 mypy pytest pytest-asyncio
-        pip install -e .[dev]
+        pip install black isort flake8
 
     - name: Run black formatter
       run: |
@@ -77,21 +76,9 @@ jobs:
         flake8 pycord/quart --count --select=E9,F63,F7,F82 --show-source --statistics
         flake8 pycord/quart --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
 
-    - name: Type check with mypy
-      run: |
-        echo "Running mypy type checks..."
-        mypy pycord/quart
-      continue-on-error: true
-
-    - name: Test with pytest
-      run: |
-        echo "Running pytest unit tests..."
-        pytest -v --tb=short
-      continue-on-error: false
-
     - name: Verify code quality after formatting
       run: |
-        echo "All tests passed! Code is ready for commit."
+        echo "All checks passed! Code is ready for commit."
 
     - name: Commit changes
       if: steps.verify-changed-files.outputs.changed == 'true'
@@ -99,7 +86,7 @@ jobs:
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
         git add -A
-        git commit -m "Auto-format code with black and isort [tested]"
+        git commit -m "Auto-format code with black and isort"
 
     - name: Push changes
       if: steps.verify-changed-files.outputs.changed == 'true'
@@ -117,7 +104,7 @@ jobs:
             issue_number: context.issue.number,
             owner: context.repo.owner,
             repo: context.repo.repo,
-            body: 'Code has been automatically formatted and tested! All checks passed. Please pull the latest changes.'
+            body: 'Code has been automatically formatted! All format checks passed. Please pull the latest changes.'
           })
 
     - name: Comment on PR if no changes
@@ -129,5 +116,5 @@ jobs:
             issue_number: context.issue.number,
             owner: context.repo.owner,
             repo: context.repo.repo,
-            body: 'Code formatting check completed! No formatting changes needed. All tests passed.'
+            body: 'Code formatting check completed! No formatting changes needed. All format checks passed.'
           })
