@@ -8,16 +8,18 @@ from typing import Optional, Dict, List, Any, Union
 
 class ResponseData(BaseModel):
     """Response data structure"""
+
     authenticated: Optional[bool] = None
     user: Optional[Dict[str, Any]] = None
     guilds: Optional[List[Dict[str, Any]]] = None
     total_count: Optional[int] = None
     login_url: Optional[str] = None
     message: Optional[str] = None
-    
+
 
 class ResponseStatus(BaseModel):
     """Standard response structure"""
+
     code: int = 200
     success: bool
     message: Optional[str] = None

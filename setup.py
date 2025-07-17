@@ -54,7 +54,7 @@ install_requires = [
     "py-cord",
     "pydantic",
     "quart-cors",
-    "quart"
+    "quart",
 ]
 
 packages = [
@@ -82,11 +82,11 @@ else:
 if "dev" in version or "alpha" in version or "beta" in version or "rc" in version:
     try:
         import subprocess
-        
+
         process = subprocess.Popen(
-            ["git", "rev-list", "--count", "HEAD"], 
+            ["git", "rev-list", "--count", "HEAD"],
             stdout=subprocess.PIPE,
-            stderr=subprocess.DEVNULL
+            stderr=subprocess.DEVNULL,
         )
         out, _ = process.communicate()
         if out and process.returncode == 0:
@@ -94,15 +94,15 @@ if "dev" in version or "alpha" in version or "beta" in version or "rc" in versio
             version += f".dev{commit_count}"
 
         process = subprocess.Popen(
-            ["git", "rev-parse", "--short", "HEAD"], 
+            ["git", "rev-parse", "--short", "HEAD"],
             stdout=subprocess.PIPE,
-            stderr=subprocess.DEVNULL
+            stderr=subprocess.DEVNULL,
         )
         out, _ = process.communicate()
         if out and process.returncode == 0:
             short_hash = out.decode("utf-8").strip()
             version += f"+g{short_hash}"
-            
+
     except (Exception, FileNotFoundError):
         pass
 

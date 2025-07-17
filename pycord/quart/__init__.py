@@ -1,6 +1,7 @@
 """
 pycord-quart - Discord OAuth2 authentication library for Quart applications
 """
+
 from typing import NamedTuple
 from .auth import DiscordAuth
 from .decorators import require_auth, get_current_user, get_access_token
@@ -23,15 +24,14 @@ version = __version__
 version_info = __version_info__
 
 __all__ = [
-    "DiscordAuth", 
-    "require_auth", 
-    "get_current_user", 
+    "DiscordAuth",
+    "require_auth",
+    "get_current_user",
     "get_access_token",
-    "DiscordAuthError", 
-    "TokenExchangeError", 
-    "UserInfoError", 
-    "ResponseStatus", 
-    "ResponseData"
-    "__version__",
+    "DiscordAuthError",
+    "TokenExchangeError",
+    "UserInfoError",
+    "ResponseStatus",
+    "ResponseData" "__version__",
     "__version_info__",
 ]
