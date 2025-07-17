@@ -10,53 +10,7 @@ on:
     branches: [ main, develop ]
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Set up Python 3.10
-      uses: actions/setup-python@v4
-      with:
-        python-version: "3.10"
-
-    - name: Cache pip packages
-      uses: actions/cache@v3
-      with:
-        path: ~/.cache/pip
-        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-        restore-keys: |
-          ${{ runner.os }}-pip-
-
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip setuptools wheel
-        pip install -e .[dev]
-        pip install pytest pytest-asyncio flake8 mypy black isort
-
-    - name: Format check with black
-      run: black --check pycord/quart
-
-    - name: Import sorting check with isort
-      run: isort --check-only pycord/quart
-
-    - name: Lint with flake8
-      run: |
-        flake8 pycord/quart --count --select=E9,F63,F7,F82 --show-source --statistics
-        flake8 pycord/quart --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-
-    - name: Type check with mypy
-      run: mypy pycord/quart
-      continue-on-error: true
-
-    - name: Test with pytest
-      run: pytest -v
-      continue-on-error: true
-
   build:
-    needs: test
     runs-on: ubuntu-latest
     if: github.event_name == 'release' || startsWith(github.ref, 'refs/tags/')
 
@@ -91,7 +45,7 @@ jobs:
         path: dist/
 
   publish-test:
-    needs: [test, build]
+    needs: [build]
     runs-on: ubuntu-latest
     if: github.event_name == 'release' && github.event.action == 'prereleased'
     environment: testpypi
@@ -111,7 +65,7 @@ jobs:
         skip-existing: true
 
   publish-pypi:
-    needs: [test, build]
+    needs: [build]
     runs-on: ubuntu-latest
     if: github.event_name == 'release' && github.event.action == 'published'
     environment: production

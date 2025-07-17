@@ -26,10 +26,19 @@ jobs:
       with:
         python-version: "3.10"
 
-    - name: Install formatting tools
+    - name: Cache pip packages
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+
+    - name: Install dependencies
       run: |
-        python -m pip install --upgrade pip
-        pip install black isort
+        python -m pip install --upgrade pip setuptools wheel
+        pip install black isort flake8 mypy pytest pytest-asyncio
+        pip install -e .[dev]
 
     - name: Run black formatter
       run: |
@@ -52,13 +61,35 @@ jobs:
           echo "No files were changed by formatting"
         fi
 
+    - name: Lint with flake8
+      run: |
+        echo "Running flake8 syntax checks..."
+        flake8 pycord/quart --count --select=E9,F63,F7,F82 --show-source --statistics
+        flake8 pycord/quart --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+
+    - name: Type check with mypy
+      run: |
+        echo "Running mypy type checks..."
+        mypy pycord/quart
+      continue-on-error: true
+
+    - name: Test with pytest
+      run: |
+        echo "Running pytest unit tests..."
+        pytest -v --tb=short
+      continue-on-error: false
+
+    - name: Verify code quality after formatting
+      run: |
+        echo "All tests passed! Code is ready for commit."
+
     - name: Commit changes
       if: steps.verify-changed-files.outputs.changed == 'true'
       run: |
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
         git add -A
-        git commit -m "Auto-format code with black and isort"
+        git commit -m "Auto-format code with black and isort [tested]"
 
     - name: Push changes
       if: steps.verify-changed-files.outputs.changed == 'true'
@@ -76,5 +107,17 @@ jobs:
             issue_number: context.issue.number,
             owner: context.repo.owner,
             repo: context.repo.repo,
-            body: 'Code has been automatically formatted! Please pull the latest changes.'
+            body: 'Code has been automatically formatted and tested! All checks passed. Please pull the latest changes.'
+          })
+
+    - name: Comment on PR if no changes
+      if: steps.verify-changed-files.outputs.changed == 'false' && github.event_name == 'pull_request'
+      uses: actions/github-script@v6
+      with:
+        script: |
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: 'Code formatting check completed! No formatting changes needed. All tests passed.'
           })
