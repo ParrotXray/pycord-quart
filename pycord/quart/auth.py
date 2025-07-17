@@ -47,6 +47,7 @@ class DiscordAuth:
         Raises:
             TokenExchangeError: If token exchange fails
         """
+        
         data = {
             'client_id': self.client_id,
             'client_secret': self.client_secret,
@@ -55,6 +56,8 @@ class DiscordAuth:
             'redirect_uri': self.redirect_uri,
         }
         
+        encoded_data = urlencode(data)
+        
         headers = {
             'Content-Type': 'application/x-www-form-urlencoded'
         }
@@ -62,7 +65,8 @@ class DiscordAuth:
         try:
             async with aiohttp.ClientSession() as session:
                 async with session.post(f'{self.DISCORD_OAUTH_BASE}/token', 
-                                      data=data, headers=headers) as response:
+                                    data=encoded_data,
+                                    headers=headers) as response:
                     if response.status == 200:
                         return await response.json()
                     else:
@@ -141,16 +145,25 @@ class DiscordAuth:
         Returns:
             Whether revocation was successful
         """
+        from urllib.parse import urlencode
+        
         data = {
             'client_id': self.client_id,
             'client_secret': self.client_secret,
             'token': access_token
         }
         
+        encoded_data = urlencode(data)
+        
+        headers = {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        }
+        
         try:
             async with aiohttp.ClientSession() as session:
                 async with session.post(f'{self.DISCORD_OAUTH_BASE}/token/revoke', 
-                                      data=data) as response:
+                                    data=encoded_data,
+                                    headers=headers) as response:
                     return response.status == 200
         except aiohttp.ClientError as e:
             logger.warning(f"Token revocation failed: {e}")

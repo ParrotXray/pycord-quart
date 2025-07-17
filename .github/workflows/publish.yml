@@ -1,0 +1,150 @@
+name: Build and Publish to PyPI
+
+on:
+  push:
+    tags:
+      - 'v*'
+  release:
+    types: [published]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Cache pip packages
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip setuptools wheel
+        pip install -e .[dev]
+        pip install pytest pytest-asyncio flake8 mypy black isort
+
+    - name: Format check with black
+      run: black --check pycord/quart
+
+    - name: Import sorting check with isort
+      run: isort --check-only pycord/quart
+
+    - name: Lint with flake8
+      run: |
+        flake8 pycord/quart --count --select=E9,F63,F7,F82 --show-source --statistics
+        flake8 pycord/quart --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+
+    - name: Type check with mypy
+      run: mypy pycord/quart
+      continue-on-error: true
+
+    - name: Test with pytest
+      run: pytest -v
+      continue-on-error: true
+
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.event_name == 'release' || startsWith(github.ref, 'refs/tags/')
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+
+    - name: Install build dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install build twine
+
+    - name: Build source and wheel distributions
+      run: |
+        python -m build --sdist --wheel --outdir dist/
+
+    - name: Check distribution files
+      run: |
+        python -m twine check dist/*
+
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: dist-files
+        path: dist/
+
+  publish-test:
+    needs: [test, build]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'release' && github.event.action == 'prereleased'
+    environment: testpypi
+
+    steps:
+    - name: Download build artifacts
+      uses: actions/download-artifact@v3
+      with:
+        name: dist-files
+        path: dist/
+
+    - name: Publish to TestPyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        password: ${{ secrets.TEST_PYPI_API_TOKEN }}
+        repository-url: https://test.pypi.org/legacy/
+        skip-existing: true
+
+  publish-pypi:
+    needs: [test, build]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'release' && github.event.action == 'published'
+    environment: production
+
+    steps:
+    - name: Download build artifacts
+      uses: actions/download-artifact@v3
+      with:
+        name: dist-files
+        path: dist/
+
+    - name: Publish to PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        password: ${{ secrets.PYPI_API_TOKEN }}
+
+  notify:
+    needs: [publish-pypi]
+    runs-on: ubuntu-latest
+    if: always()
+
+    steps:
+    - name: Notify success
+      if: needs.publish-pypi.result == 'success'
+      run: |
+        echo "Successfully published to PyPI!"
+        echo "Package URL: https://pypi.org/project/pycord-quart/"
+
+    - name: Notify failure
+      if: needs.publish-pypi.result == 'failure'
+      run: |
+        echo "Failed to publish to PyPI!"
+        exit 1
