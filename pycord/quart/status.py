@@ -2,8 +2,9 @@
 pycord-quart Response Status Classes
 """
 
+from typing import Any, Dict, List, Optional, Union
+
 from pydantic import BaseModel
-from typing import Optional, Dict, List, Any, Union
 
 
 class ResponseData(BaseModel):

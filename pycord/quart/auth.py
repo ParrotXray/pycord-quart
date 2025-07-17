@@ -2,14 +2,16 @@
 pycord-quart Discord OAuth2 Authentication Module
 """
 
-import aiohttp
-import secrets
 import logging
-from typing import Dict, List, Optional, Union, Any
+import secrets
+from typing import Any, Dict, List, Optional, Union
 from urllib.parse import urlencode
-from quart import session, request, jsonify, redirect
+
+import aiohttp
+from quart import jsonify, redirect, request, session
+
 from .exceptions import DiscordAuthError, TokenExchangeError, UserInfoError
-from .status import ResponseStatus, ResponseData
+from .status import ResponseData, ResponseStatus
 
 logger = logging.getLogger(__name__)
 
