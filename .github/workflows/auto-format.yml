@@ -61,6 +61,16 @@ jobs:
           echo "No files were changed by formatting"
         fi
 
+    - name: Format check with black
+      run: |
+        echo "Checking code formatting with black..."
+        black --check pycord/quart
+
+    - name: Import sorting check with isort
+      run: |
+        echo "Checking import sorting with isort..."
+        isort --check-only pycord/quart
+
     - name: Lint with flake8
       run: |
         echo "Running flake8 syntax checks..."
