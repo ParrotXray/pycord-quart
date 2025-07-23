@@ -77,7 +77,7 @@ if init_file.exists():
         else:
             raise RuntimeError("Cannot find version string in __init__.py")
 else:
-    version = "0.1.1"
+    version = "0.1.3"
 
 if "dev" in version or "alpha" in version or "beta" in version or "rc" in version:
     try:

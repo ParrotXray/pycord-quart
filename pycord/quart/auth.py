@@ -20,7 +20,11 @@ class DiscordAuth:
     """Discord OAuth2 Authentication Handler"""
 
     def __init__(
-        self, client_id: str, client_secret: str, redirect_uri: str, scopes: List[str] = None
+        self, client_id: str, 
+        client_secret: str, 
+        redirect_uri: str, 
+        prompt: str = None,
+        scopes: List[str] = None
     ):
         """
         Initialize Discord authentication handler
@@ -29,11 +33,13 @@ class DiscordAuth:
             client_id: Discord application ID
             client_secret: Discord application secret
             redirect_uri: OAuth2 redirect URI
+            prompt: OAuth2 prompt parameter ('consent', 'none', or None for default)
             scopes: OAuth2 authorization scopes
         """
         self.client_id = client_id
         self.client_secret = client_secret
         self.redirect_uri = redirect_uri
+        self.prompt = prompt
         self.scopes = scopes or ["identify", "email", "guilds"]
         self.DISCORD_API_BASE = "https://discord.com/api/v10"
         self.DISCORD_OAUTH_BASE = "https://discord.com/api/oauth2"
@@ -186,6 +192,7 @@ class DiscordAuth:
             "response_type": "code",
             "scope": " ".join(self.scopes),
             "state": state,
+            'prompt': self.prompt,
         }
 
         return f"{self.DISCORD_OAUTH_BASE}/authorize?{urlencode(params)}"
@@ -409,9 +416,10 @@ class DiscordAuth:
             JSON response
         """
         try:
-            access_token = session.get("access_token")
-            if access_token:
-                await self.revoke_token(access_token)
+            if self.prompt != 'none':
+                access_token = session.get("access_token")
+                if access_token:
+                    await self.revoke_token(access_token)
 
             session.clear()
 
