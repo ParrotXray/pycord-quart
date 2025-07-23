@@ -20,11 +20,12 @@ class DiscordAuth:
     """Discord OAuth2 Authentication Handler"""
 
     def __init__(
-        self, client_id: str, 
-        client_secret: str, 
-        redirect_uri: str, 
+        self,
+        client_id: str,
+        client_secret: str,
+        redirect_uri: str,
         prompt: str = None,
-        scopes: List[str] = None
+        scopes: List[str] = None,
     ):
         """
         Initialize Discord authentication handler
@@ -192,7 +193,7 @@ class DiscordAuth:
             "response_type": "code",
             "scope": " ".join(self.scopes),
             "state": state,
-            'prompt': self.prompt,
+            "prompt": self.prompt,
         }
 
         return f"{self.DISCORD_OAUTH_BASE}/authorize?{urlencode(params)}"
@@ -416,7 +417,7 @@ class DiscordAuth:
             JSON response
         """
         try:
-            if self.prompt != 'none':
+            if self.prompt != "none":
                 access_token = session.get("access_token")
                 if access_token:
                     await self.revoke_token(access_token)
