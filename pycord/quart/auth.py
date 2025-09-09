@@ -258,7 +258,7 @@ class DiscordAuth:
                         else None
                     ),
                     "owner": guild_data.get("owner", False),
-                    "permissions": permissions,
+                    "permissions": str(permissions),
                     "bot_present": int(guild_data["id"]) in guild_ids,
                 }
                 admin_guilds.append(guild_info)
