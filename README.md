@@ -1,4 +1,10 @@
 # pycord-quart
+
+[![PyPI](https://img.shields.io/pypi/v/pycord-quart.svg)](https://pypi.org/project/pycord-quart/)
+[![downloads](https://img.shields.io/pypi/dm/pycord-quart.svg)](https://pypi.org/project/pycord-quart/)
+[![Python](https://img.shields.io/pypi/pyversions/pycord-quart.svg)](https://pypi.org/project/pycord-quart/)
+[![License](https://img.shields.io/github/license/ParrotXray/pycord-quart.svg)](https://github.com/ParrotXray/pycord-quart/blob/main/LICENSE)
+
 A pycord extension for Discord OAuth2 authentication in Quart applications.
 
 # Installation 
